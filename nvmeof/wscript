@@ -1,0 +1,193 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+# def options(opt):
+#     pass
+
+# def configure(conf):
+#     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
+
+def build(bld):
+    module = bld.create_ns3_module('nvmeof', ['core'])
+    module.source = [
+        'model/nvmeof.cc',
+        'helper/nvmeof-helper.cc',
+		
+		'helper/src/testmain.cpp',
+		
+		'helper/src/exec/Device_Parameter_Set.cpp',
+		'helper/src/exec/Flash_Parameter_Set.cpp',
+		'helper/src/exec/Host_System.cpp',
+		'helper/src/exec/SSD_Device.cpp',
+		'helper/src/exec/IO_Flow_Parameter_Set.cpp',
+		'helper/src/exec/Host_Parameter_Set.cpp',
+		'helper/src/exec/Execution_Parameter_Set.cpp',
+
+		'helper/src/host/IO_Flow_Base.cpp',
+		'helper/src/host/IO_Flow_Synthetic.cpp',
+		'helper/src/host/IO_Flow_Trace_Based.cpp',
+		'helper/src/host/PCIe_Link.cpp',
+		'helper/src/host/PCIe_Root_Complex.cpp',
+		'helper/src/host/PCIe_Switch.cpp',
+		'helper/src/host/SATA_HBA.cpp',
+
+		'helper/src/nvm_chip/flash_memory/Block.cpp',
+		'helper/src/nvm_chip/flash_memory/Die.cpp',
+		'helper/src/nvm_chip/flash_memory/Flash_Chip.cpp',
+		'helper/src/nvm_chip/flash_memory/Physical_Page_Address.cpp',
+		'helper/src/nvm_chip/flash_memory/Plane.cpp',
+
+		'helper/src/sim/Engine.cpp',
+		'helper/src/sim/EventTree.cpp',
+
+		'helper/src/ssd/Data_Cache_Manager_Base.cpp',
+		'helper/src/ssd/NVM_Transaction_Flash_RD.cpp',
+		'helper/src/ssd/Host_Interface_SATA.cpp',
+		'helper/src/ssd/Host_Interface_NVMe.cpp',
+		'helper/src/ssd/Flash_Block_Manager_Base.cpp',
+		'helper/src/ssd/NVM_Transaction_Flash_ER.cpp',
+		'helper/src/ssd/NVM_PHY_ONFI_NVDDR2.cpp',
+		'helper/src/ssd/TSU_FLIN.cpp',
+		'helper/src/ssd/Address_Mapping_Unit_Hybrid.cpp',
+		'helper/src/ssd/Data_Cache_Manager_Flash_Advanced.cpp',
+		'helper/src/ssd/Address_Mapping_Unit_Base.cpp',
+		'helper/src/ssd/NVM_Transaction_Flash.cpp',
+		'helper/src/ssd/User_Request.cpp',
+		'helper/src/ssd/Data_Cache_Flash.cpp',
+		'helper/src/ssd/Address_Mapping_Unit_Page_Level.cpp',
+		'helper/src/ssd/Data_Cache_Manager_Flash_Simple.cpp',
+		'helper/src/ssd/GC_and_WL_Unit_Base.cpp',
+		'helper/src/ssd/TSU_OutofOrder.cpp',
+		'helper/src/ssd/NVM_Firmware.cpp',
+		'helper/src/ssd/ONFI_Channel_NVDDR2.cpp',
+		'helper/src/ssd/GC_and_WL_Unit_Page_Level.cpp',
+		'helper/src/ssd/NVM_PHY_ONFI.cpp',
+		'helper/src/ssd/NVM_PHY_Base.cpp',
+		'helper/src/ssd/Flash_Block_Manager.cpp',
+		'helper/src/ssd/NVM_Transaction_Flash_WR.cpp',
+		'helper/src/ssd/ONFI_Channel_Base.cpp',
+		'helper/src/ssd/FTL.cpp',
+		'helper/src/ssd/Host_Interface_Base.cpp',
+		'helper/src/ssd/TSU_Base.cpp',
+		'helper/src/ssd/Queue_Probe.cpp',
+		'helper/src/ssd/Flash_Transaction_Queue.cpp',
+		'helper/src/ssd/Stats.cpp',
+
+		'helper/src/utils/RandomGenerator.cpp',
+		'helper/src/utils/XMLWriter.cpp',
+		'helper/src/utils/Logical_Address_Partitioning_Unit.cpp',
+		'helper/src/utils/Helper_Functions.cpp',
+		'helper/src/utils/CMRRandomGenerator.cpp',
+		'helper/src/utils/StringTools.cpp'
+
+        ]
+
+    module_test = bld.create_ns3_module_test_library('nvmeof')
+    module_test.source = [
+        'test/nvmeof-test-suite.cc',
+        ]
+
+    headers = bld(features='ns3header')
+    headers.module = 'nvmeof'
+    headers.source = [
+        'model/nvmeof.h',
+        'helper/nvmeof-helper.h',
+       	
+		'helper/src/testmain.h',
+
+		'helper/src/exec/Parameter_Set_Base.h',
+		'helper/src/exec/Device_Parameter_Set.h',
+		'helper/src/exec/Flash_Parameter_Set.h',
+		'helper/src/exec/Host_System.h',
+		'helper/src/exec/SSD_Device.h',
+		'helper/src/exec/IO_Flow_Parameter_Set.h',
+		'helper/src/exec/Host_Parameter_Set.h',
+		'helper/src/exec/Execution_Parameter_Set.h',
+		
+		'helper/src/host/ASCII_Trace_Definition.h',
+		'helper/src/host/Host_Defs.h',
+		'helper/src/host/Host_IO_Request.h',
+		'helper/src/host/PCIe_Message.h',
+		'helper/src/host/IO_Flow_Base.h',
+		'helper/src/host/IO_Flow_Synthetic.h',
+		'helper/src/host/IO_Flow_Trace_Based.h',
+		'helper/src/host/PCIe_Link.h',
+		'helper/src/host/PCIe_Root_Complex.h',
+		'helper/src/host/PCIe_Switch.h',
+		'helper/src/host/SATA_HBA.h',
+		
+		'helper/src/nvm_chip/flash_memory/FlashTypes.h',
+		'helper/src/nvm_chip/flash_memory/Page.h',
+		'helper/src/nvm_chip/NVM_Chip.h',
+		'helper/src/nvm_chip/NVM_Memory_Address.h',
+		'helper/src/nvm_chip/NVM_Types.h',
+		'helper/src/nvm_chip/flash_memory/Block.h',
+		'helper/src/nvm_chip/flash_memory/Die.h',
+		'helper/src/nvm_chip/flash_memory/Flash_Chip.h',
+		'helper/src/nvm_chip/flash_memory/Physical_Page_Address.h',
+		'helper/src/nvm_chip/flash_memory/Plane.h',
+		'helper/src/nvm_chip/flash_memory/Flash_Command.h',
+        
+		'helper/src/sim/Engine.h',
+		'helper/src/sim/EventTree.h',
+		'helper/src/sim/Sim_Defs.h',
+		'helper/src/sim/Sim_Event.h',
+		'helper/src/sim/Sim_Object.h',
+		'helper/src/sim/Sim_Reporter.h',
+
+		'helper/src/ssd/Flash_Transaction_Queue.h',
+		'helper/src/ssd/ONFI_Channel_NVDDR2.h',
+		'helper/src/ssd/NVM_PHY_Base.h',
+		'helper/src/ssd/NVM_Transaction.h',
+		'helper/src/ssd/Address_Mapping_Unit_Hybrid.h',
+		'helper/src/ssd/Address_Mapping_Unit_Page_Level.h',
+		'helper/src/ssd/Data_Cache_Manager_Base.h',
+		'helper/src/ssd/TSU_OutofOrder.h',
+		'helper/src/ssd/NVM_PHY_ONFI.h',
+		'helper/src/ssd/NVM_Transaction_Flash_RD.h',
+		'helper/src/ssd/GC_and_WL_Unit_Base.h',
+		'helper/src/ssd/Host_Interface_Defs.h',
+		'helper/src/ssd/Flash_Block_Manager.h',
+		'helper/src/ssd/Data_Cache_Manager_Flash_Advanced.h',
+		'helper/src/ssd/TSU_FLIN.h',
+		'helper/src/ssd/NVM_PHY_ONFI_NVDDR2.h',
+		'helper/src/ssd/NVM_Transaction_Flash.h',
+		'helper/src/ssd/User_Request.h',
+		'helper/src/ssd/Queue_Probe.h',
+		'helper/src/ssd/Data_Cache_Flash.h',
+		'helper/src/ssd/NVM_Transaction_Flash_ER.h',
+		'helper/src/ssd/NVM_Firmware.h',
+		'helper/src/ssd/Host_Interface_Base.h',
+		'helper/src/ssd/ONFI_Channel_Base.h',
+		'helper/src/ssd/SSD_Defs.h',
+		'helper/src/ssd/Host_Interface_NVMe.h',
+		'helper/src/ssd/Address_Mapping_Unit_Base.h',
+		'helper/src/ssd/Data_Cache_Manager_Flash_Simple.h',
+		'helper/src/ssd/NVM_Transaction_Flash_WR.h',
+		'helper/src/ssd/FTL.h',
+		'helper/src/ssd/NVM_Channel_Base.h',
+		'helper/src/ssd/GC_and_WL_Unit_Page_Level.h',
+		'helper/src/ssd/Host_Interface_SATA.h',
+		'helper/src/ssd/Flash_Block_Manager_Base.h',
+		'helper/src/ssd/TSU_Base.h',
+		'helper/src/ssd/Stats.h',
+
+		'helper/src/utils/StringTools.h',
+		'helper/src/utils/XMLWriter.h',
+		'helper/src/utils/CMRRandomGenerator.h',
+		'helper/src/utils/RandomGenerator.h',
+		'helper/src/utils/Workload_Statistics.h',
+		'helper/src/utils/Helper_Functions.h',
+		'helper/src/utils/Logical_Address_Partitioning_Unit.h',
+		'helper/src/utils/DistributionTypes.h',
+
+		'helper/src/utils/rapidxml/rapidxml.hpp',
+		'helper/src/utils/rapidxml/rapidxml_iterators.hpp',
+		'helper/src/utils/rapidxml/rapidxml_print.hpp',
+		'helper/src/utils/rapidxml/rapidxml_utils.hpp'
+		]
+
+    if bld.env.ENABLE_EXAMPLES:
+        bld.recurse('examples')
+	
+    #bld.ns3_python_bindings()
+
