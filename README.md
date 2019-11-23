@@ -9,3 +9,5 @@ CXXFLAGS="-Wno-error" ./waf configure --enable-examples --enable-tests
 ./waf build
 ./waf --run 
 </pre>
+
+11/24 NS-3 setup ok
