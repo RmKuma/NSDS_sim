@@ -7,11 +7,16 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('nvmeof', ['core'])
+    module = bld.create_ns3_module('nvmeof', ['core', 'internet', 'config-store', 'stats'])
     module.source = [
+		'model/nvmeof-host.cc',
+		'model/nvmeof-target.cc',
         'model/nvmeof.cc',
+
         'helper/nvmeof-helper.cc',
-		
+		'helper/nvmeof-host-helper.cc',
+		'helper/nvmeof-target-helper.cc',
+
 		'helper/src/testmain.cpp',
 		
 		'helper/src/exec/Device_Parameter_Set.cpp',
@@ -89,9 +94,14 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'nvmeof'
     headers.source = [
-        'model/nvmeof.h',
+        'model/nvmeof-host.h',
+		'model/nvmeof-target.h',
+		
+		'model/nvmeof.h',
         'helper/nvmeof-helper.h',
-       	
+       	'helper/nvmeof-host-helper.h',
+		'helper/nvmeof-target-helper.h',
+
 		'helper/src/testmain.h',
 
 		'helper/src/exec/Parameter_Set_Base.h',
