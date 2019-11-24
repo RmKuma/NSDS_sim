@@ -86,8 +86,18 @@ main (int argc, char *argv[])
 	for (auto io_flow_def = (*io_scen)->begin(); io_flow_def != (*io_scen)->end(); io_flow_def++) {
 	  exec_params->Host_Configuration.IO_Flow_Definitions.push_back(*io_flow_def);
 	}	
-	// ============ MQSim IO Flow Definition ===========
+	
+	MQSimulator->Reset();
 
+	SSD_Device ssd_device (&exec_params->SSD_Device_Configuration, &exec_params->Host_Configuration.IO_Flow_Definitions);
+	exec_params->Host_Configuration.Input_file_path = workload_defs_file_path.substr(0, workload_defs_file_path.find_last_of("."));
+	Host_System hostsys (&exec_params->Host_Configuration, exec_params->SSD_Device_Configuration.Enabled_Preconditioning, ssd_device.Host_interface);
+	hostsys.Attach_ssd_device(&ssd_device);
+
+	// ============ MQSim IO Flow Definition ===========
+	//
+	
+	NodeContainer nodes;
     nodes.Create (2);
 
     PointToPointHelper pointToPoint;
@@ -122,9 +132,8 @@ main (int argc, char *argv[])
     host.SetAttribute ("MaxBytes", UintegerValue (maxBytes));
     ApplicationContainer hostApps = host.Install (nodes.Get (0));
     hostApps.Start (MicroSeconds (0.0));
-    hostApps.Stop (MicroSeconds (10000000.0));
+    hostApps.Stop (MicroSeconds (1000000000.0));
 
-    // MQSim Host
 	
 
 //
@@ -134,18 +143,22 @@ main (int argc, char *argv[])
                          InetSocketAddress (Ipv4Address::GetAny (), port));
     ApplicationContainer targetApps = target.Install (nodes.Get (1));
     targetApps.Start (MicroSeconds (0.0));
-    targetApps.Stop (MicroSeconds (10000000.0));
+    targetApps.Stop (MicroSeconds (1000000000.0));
 
 //
 // Now, do the actual simulation.
 // 
-    std::cout << "NS Start" << std::endl;
+    MQSimulator->Start_simulation();
+	
+	std::cout << "NS Start" << std::endl;
 
     NS_LOG_INFO ("Run Simulation.");
-    Simulator::Stop (MicroSeconds (10000000.0));
+    Simulator::Stop (MicroSeconds (1000000000.0));
     Simulator::Run ();
     Simulator::Destroy ();
     NS_LOG_INFO ("Done.");
+
+	collect_results(ssd_device, hostsys, ("result_scenario_" + std::to_string(cntr) + ".xml").c_str());
 
     Ptr<NVMeoFHostApplication> host1 = DynamicCast<NVMeoFHostApplication> (hostApps.Get (0));
     Ptr<NVMeoFTargetApplication> target1 = DynamicCast<NVMeoFTargetApplication> (targetApps.Get (0));

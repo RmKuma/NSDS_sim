@@ -2,6 +2,9 @@
 #include "ns3/Host_Interface_Defs.h"
 #include "ns3/Engine.h"
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
+
 namespace Host_Components
 {
 	//unsigned int InputStreamBase::lastId = 0;
@@ -146,8 +149,8 @@ namespace Host_Components
 
 	void IO_Flow_Base::SATA_consume_io_request(Host_IO_Request* request)
 	{
-		sim_time_type device_response_time = MQSimulator->Time() - request->Enqueue_time;
-		sim_time_type request_delay = MQSimulator->Time() - request->Arrival_time;
+		sim_time_type device_response_time = ns3::Simulator::Now().GetNanoSeconds() - request->Enqueue_time;
+		sim_time_type request_delay = ns3::Simulator::Now().GetNanoSeconds() - request->Arrival_time;
 		
 		STAT_serviced_request_count++;
 		STAT_serviced_request_count_short_term++;
@@ -209,7 +212,7 @@ namespace Host_Components
 
 		//Announce simulation progress
 		if (stop_time > 0) {
-			progress = int(MQSimulator->Time() / (double)stop_time * 100);
+			progress = int(ns3::Simulator::Now().GetNanoSeconds() / (double)stop_time * 100);
 		} else {
 			progress = int(STAT_serviced_request_count / (double)total_requests_to_be_generated * 100);
 		}
@@ -232,12 +235,12 @@ namespace Host_Components
 				next_progress_step += 5;
 		}
 
-		if (MQSimulator->Time() > next_logging_milestone) {
-			log_file << MQSimulator->Time() / SIM_TIME_TO_MICROSECONDS_COEFF << "\t" << Get_device_response_time_short_term() << "\t" << Get_end_to_end_request_delay_short_term() << std::endl;
+		if (ns3::Simulator::Now().GetNanoSeconds() > next_logging_milestone) {
+			log_file << ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_MICROSECONDS_COEFF << "\t" << Get_device_response_time_short_term() << "\t" << Get_end_to_end_request_delay_short_term() << std::endl;
 			STAT_sum_device_response_time_short_term = 0;
 			STAT_sum_request_delay_short_term = 0;
 			STAT_serviced_request_count_short_term = 0;
-			next_logging_milestone = MQSimulator->Time() + logging_period;
+			next_logging_milestone = ns3::Simulator::Now().GetNanoSeconds() + logging_period;
 		}
 	}
 
@@ -247,8 +250,8 @@ namespace Host_Components
 		Host_IO_Request* request = nvme_software_request_queue[cqe->Command_Identifier];
 		nvme_software_request_queue.erase(cqe->Command_Identifier);
 		available_command_ids.insert(cqe->Command_Identifier);
-		sim_time_type device_response_time = MQSimulator->Time() - request->Enqueue_time;
-		sim_time_type request_delay = MQSimulator->Time() - request->Arrival_time;
+		sim_time_type device_response_time = ns3::Simulator::Now().GetNanoSeconds() - request->Enqueue_time;
+		sim_time_type request_delay = ns3::Simulator::Now().GetNanoSeconds() - request->Arrival_time;
 		STAT_serviced_request_count++;
 		STAT_serviced_request_count_short_term++;
 
@@ -326,7 +329,7 @@ namespace Host_Components
 					request_queue_in_memory[nvme_queue_pair.Submission_queue_tail] = new_req;
 					NVME_UPDATE_SQ_TAIL(nvme_queue_pair);
 				}
-				new_req->Enqueue_time = MQSimulator->Time();
+				new_req->Enqueue_time = ns3::Simulator::Now().GetNanoSeconds();
 				pcie_root_complex->Write_to_device(nvme_queue_pair.Submission_tail_register_address_on_device, nvme_queue_pair.Submission_queue_tail);//Based on NVMe protocol definition, the updated tail pointer should be informed to the device
 			} else {
 				break;
@@ -337,7 +340,7 @@ namespace Host_Components
 
 		//Announce simulation progress
 		if (stop_time > 0) {
-			progress = int(MQSimulator->Time() / (double)stop_time * 100);
+			progress = int(ns3::Simulator::Now().GetNanoSeconds() / (double)stop_time * 100);
 		} else {
 			progress = int(STAT_serviced_request_count / (double)total_requests_to_be_generated * 100);
 		}
@@ -361,12 +364,12 @@ namespace Host_Components
 			next_progress_step += 5;
 		}
 
-		if (MQSimulator->Time() > next_logging_milestone) {
-			log_file << MQSimulator->Time() / SIM_TIME_TO_MICROSECONDS_COEFF << "\t" << Get_device_response_time_short_term() << "\t" << Get_end_to_end_request_delay_short_term() << std::endl;
+		if (ns3::Simulator::Now().GetNanoSeconds() > next_logging_milestone) {
+			log_file << ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_MICROSECONDS_COEFF << "\t" << Get_device_response_time_short_term() << "\t" << Get_end_to_end_request_delay_short_term() << std::endl;
 			STAT_sum_device_response_time_short_term = 0;
 			STAT_sum_request_delay_short_term = 0;
 			STAT_serviced_request_count_short_term = 0;
-			next_logging_milestone = MQSimulator->Time() + logging_period;
+			next_logging_milestone = ns3::Simulator::Now().GetNanoSeconds() + logging_period;
 		}
 	}
 	
@@ -416,7 +419,7 @@ namespace Host_Components
 						request_queue_in_memory[nvme_queue_pair.Submission_queue_tail] = request;
 						NVME_UPDATE_SQ_TAIL(nvme_queue_pair);
 					}
-					request->Enqueue_time = MQSimulator->Time();
+					request->Enqueue_time = ns3::Simulator::Now().GetNanoSeconds();
 					pcie_root_complex->Write_to_device(nvme_queue_pair.Submission_tail_register_address_on_device, nvme_queue_pair.Submission_queue_tail);//Based on NVMe protocol definition, the updated tail pointer should be informed to the device
 				}
 				break;
@@ -540,15 +543,15 @@ namespace Host_Components
 		xmlwriter.Write_attribute_string(attr, val);
 
 		attr = "IOPS";
-		val = std::to_string((double)STAT_generated_request_count / (MQSimulator->Time() / SIM_TIME_TO_SECONDS_COEFF));
+		val = std::to_string((double)STAT_generated_request_count / (ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_SECONDS_COEFF));
 		xmlwriter.Write_attribute_string(attr, val);
 
 		attr = "IOPS_Read";
-		val = std::to_string((double)STAT_generated_read_request_count / (MQSimulator->Time() / SIM_TIME_TO_SECONDS_COEFF));
+		val = std::to_string((double)STAT_generated_read_request_count / (ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_SECONDS_COEFF));
 		xmlwriter.Write_attribute_string(attr, val);
 
 		attr = "IOPS_Write";
-		val = std::to_string((double)STAT_generated_write_request_count / (MQSimulator->Time() / SIM_TIME_TO_SECONDS_COEFF));
+		val = std::to_string((double)STAT_generated_write_request_count / (ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_SECONDS_COEFF));
 		xmlwriter.Write_attribute_string(attr, val);
 
 		attr = "Bytes_Transferred";
@@ -564,15 +567,15 @@ namespace Host_Components
 		xmlwriter.Write_attribute_string(attr, val);
 
 		attr = "Bandwidth";
-		val = std::to_string((double)STAT_transferred_bytes_total / (MQSimulator->Time() / SIM_TIME_TO_SECONDS_COEFF));
+		val = std::to_string((double)STAT_transferred_bytes_total / (ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_SECONDS_COEFF));
 		xmlwriter.Write_attribute_string(attr, val);
 
 		attr = "Bandwidth_Read";
-		val = std::to_string((double)STAT_transferred_bytes_read / (MQSimulator->Time() / SIM_TIME_TO_SECONDS_COEFF));
+		val = std::to_string((double)STAT_transferred_bytes_read / (ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_SECONDS_COEFF));
 		xmlwriter.Write_attribute_string(attr, val);
 
 		attr = "Bandwidth_Write";
-		val = std::to_string((double)STAT_transferred_bytes_write / (MQSimulator->Time() / SIM_TIME_TO_SECONDS_COEFF));
+		val = std::to_string((double)STAT_transferred_bytes_write / (ns3::Simulator::Now().GetNanoSeconds() / SIM_TIME_TO_SECONDS_COEFF));
 		xmlwriter.Write_attribute_string(attr, val);
 
 

@@ -49,7 +49,7 @@ namespace Host_Components
 			request->Start_LBA = start_lsa_on_device + request->Start_LBA % (end_lsa_on_device - start_lsa_on_device);
 		}
 
-		request->Arrival_time = time_offset + MQSimulator->Time();
+		request->Arrival_time = time_offset + ns3::Simulator::Now().GetNanoSeconds();
 		STAT_generated_request_count++;
 		
 		return request;
@@ -134,7 +134,7 @@ namespace Host_Components
 				trace_file.close();
 				trace_file.open(trace_file_path);
 				replay_counter++;
-				time_offset = MQSimulator->Time();
+				time_offset = ns3::Simulator::Now().GetNanoSeconds();
 				std::getline(trace_file, trace_line);
 				Utils::Helper_Functions::Remove_cr(trace_line);
 				current_trace_line.clear();

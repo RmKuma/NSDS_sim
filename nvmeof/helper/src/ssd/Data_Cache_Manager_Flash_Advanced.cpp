@@ -5,6 +5,9 @@
 #include "NVM_Transaction_Flash_WR.h"
 #include "FTL.h"
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
+
 namespace SSD_Components
 {
 	Data_Cache_Manager_Flash_Advanced::Data_Cache_Manager_Flash_Advanced(const sim_object_id_type& id, Host_Interface_Base* host_interface, NVM_Firmware* firmware, NVM_PHY_ONFI* flash_controller,
@@ -346,9 +349,9 @@ namespace SSD_Components
 		}
 		
 		//Reset control data structures used for hot/cold separation 
-		if (MQSimulator->Time() > next_bloom_filter_reset_milestone) {
+		if (ns3::Simulator::Now().GetNanoSeconds() > next_bloom_filter_reset_milestone) {
 			bloom_filter[user_request->Stream_id].clear();
-			next_bloom_filter_reset_milestone = MQSimulator->Time() + bloom_filter_reset_step;
+			next_bloom_filter_reset_milestone = ns3::Simulator::Now().GetNanoSeconds() + bloom_filter_reset_step;
 		}
 	}
 
@@ -523,7 +526,7 @@ namespace SSD_Components
 				dram_execution_queue[request_info->Stream_id].push(request_info);
 			}
 		} else {
-			MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_dram_access_time(request_info->Size_in_bytes, dram_row_size,
+			MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_dram_access_time(request_info->Size_in_bytes, dram_row_size,
 				dram_busrt_size, dram_burst_transfer_time_ddr, dram_tRCD, dram_tCL, dram_tRP),
 				this, request_info, static_cast<int>(request_info->next_event_type));
 			memory_channel_is_busy = true;
@@ -558,7 +561,7 @@ namespace SSD_Components
 			if (dram_execution_queue[0].size() > 0)	{
 				Memory_Transfer_Info* transfer_info = dram_execution_queue[0].front();
 				dram_execution_queue[0].pop();
-				MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_dram_access_time(transfer_info->Size_in_bytes, dram_row_size, dram_busrt_size,
+				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_dram_access_time(transfer_info->Size_in_bytes, dram_row_size, dram_busrt_size,
 					dram_burst_transfer_time_ddr, dram_tRCD, dram_tCL, dram_tRP),
 					this, transfer_info, static_cast<int>(transfer_info->next_event_type));
 				memory_channel_is_busy = true;
@@ -570,7 +573,7 @@ namespace SSD_Components
 				if (dram_execution_queue[dram_execution_list_turn].size() > 0) {
 					Memory_Transfer_Info* transfer_info = dram_execution_queue[dram_execution_list_turn].front();
 					dram_execution_queue[dram_execution_list_turn].pop();
-					MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_dram_access_time(transfer_info->Size_in_bytes, dram_row_size, dram_busrt_size,
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_dram_access_time(transfer_info->Size_in_bytes, dram_row_size, dram_busrt_size,
 						dram_burst_transfer_time_ddr, dram_tRCD, dram_tCL, dram_tRP),
 						this, transfer_info, static_cast<int>(transfer_info->next_event_type));
 					memory_channel_is_busy = true;

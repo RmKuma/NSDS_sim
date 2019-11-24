@@ -146,6 +146,9 @@ void NVMeoFTargetApplication::StartApplication ()    // Called at time specified
   m_socket->SetCloseCallbacks (
     MakeCallback (&NVMeoFTargetApplication::HandlePeerClose, this),
     MakeCallback (&NVMeoFTargetApplication::HandlePeerError, this));
+
+  
+
 }
 
 void NVMeoFTargetApplication::StopApplication ()     // Called at time specified by Stop

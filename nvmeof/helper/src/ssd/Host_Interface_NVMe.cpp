@@ -4,6 +4,9 @@
 #include "NVM_Transaction_Flash_RD.h"
 #include "NVM_Transaction_Flash_WR.h"
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
+
 
 namespace SSD_Components
 {
@@ -268,7 +271,7 @@ namespace SSD_Components
 				new_reqeust->IO_command_info = payload;
 				new_reqeust->Stream_id = (stream_id_type)((uint64_t)(dma_req_item->object));
 				new_reqeust->Priority_class = ((Input_Stream_Manager_NVMe*)host_interface->input_stream_manager)->Get_priority_class(new_reqeust->Stream_id);
-				new_reqeust->STAT_InitiationTime = MQSimulator->Time();
+				new_reqeust->STAT_InitiationTime = ns3::Simulator::Now().GetNanoSeconds();
 				Submission_Queue_Entry* sqe = (Submission_Queue_Entry*)payload;
 				switch (sqe->Opcode)
 				{

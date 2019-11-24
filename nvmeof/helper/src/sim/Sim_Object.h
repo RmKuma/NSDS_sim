@@ -1,13 +1,14 @@
 #ifndef SIMULATOR_OBJECT_H
 #define SIMULATOR_OBJECT_H
 
-#include<string>
+#include <string>
 #include "Sim_Event.h"
+#include "ns3/object.h"
 
 namespace MQSimEngine
 {
 	class Sim_Event;
-	class Sim_Object
+	class Sim_Object : public ns3::Object
 	{
 	public:
 		Sim_Object(const sim_object_id_type &id)

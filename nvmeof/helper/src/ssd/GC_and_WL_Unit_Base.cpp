@@ -143,10 +143,10 @@ namespace SSD_Components
 			case Transaction_Type::WRITE:
 				if (pbke->Blocks[((NVM_Transaction_Flash_WR*)transaction)->RelatedErase->Address.BlockID].Holds_mapping_data) {
 					_my_instance->address_mapping_unit->Remove_barrier_for_accessing_mvpn(transaction->Stream_id, (MVPN_type)transaction->LPA);
-					DEBUG(MQSimulator->Time() << ": MVPN=" << (MVPN_type)transaction->LPA << " unlocked!!");
+					DEBUG(ns3::Simulator::Now().GetNanoSeconds() << ": MVPN=" << (MVPN_type)transaction->LPA << " unlocked!!");
 				} else {
 					_my_instance->address_mapping_unit->Remove_barrier_for_accessing_lpa(transaction->Stream_id, transaction->LPA);
-					DEBUG(MQSimulator->Time() << ": LPA=" << (MVPN_type)transaction->LPA << " unlocked!!");
+					DEBUG(ns3::Simulator::Now().GetNanoSeconds() << ": LPA=" << (MVPN_type)transaction->LPA << " unlocked!!");
 				}
 				pbke->Blocks[((NVM_Transaction_Flash_WR*)transaction)->RelatedErase->Address.BlockID].Erase_transaction->Page_movement_activities.remove((NVM_Transaction_Flash_WR*)transaction);
 				break;

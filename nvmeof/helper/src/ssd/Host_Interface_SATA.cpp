@@ -1,5 +1,8 @@
 #include "Host_Interface_SATA.h"
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
+
 namespace SSD_Components
 {
 	Input_Stream_SATA::~Input_Stream_SATA()
@@ -201,7 +204,7 @@ namespace SSD_Components
 				User_Request* new_reqeust = new User_Request;
 				new_reqeust->IO_command_info = payload;
 				new_reqeust->Stream_id = (stream_id_type)((uint64_t)(dma_req_item->object));
-				new_reqeust->STAT_InitiationTime = MQSimulator->Time();
+				new_reqeust->STAT_InitiationTime = ns3::Simulator::Now().GetNanoSeconds();
 				Submission_Queue_Entry* sqe = (Submission_Queue_Entry*)payload;
 				switch (sqe->Opcode)
 				{

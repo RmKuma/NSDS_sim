@@ -271,7 +271,7 @@ namespace SSD_Components
 				if (!programSuspensionEnabled || _NVMController->HasSuspendedCommand(chip)) {
 					return false;
 				}
-				if (_NVMController->Expected_finish_time(chip) - MQSimulator->Time() < writeReasonableSuspensionTimeForRead) {
+				if (_NVMController->Expected_finish_time(chip) - ns3::Simulator::Now().GetNanoSeconds() < writeReasonableSuspensionTimeForRead) {
 					return false;
 				}
 				suspensionRequired = true;
@@ -279,7 +279,7 @@ namespace SSD_Components
 				if (!eraseSuspensionEnabled || _NVMController->HasSuspendedCommand(chip)) {
 					return false;
 				}
-				if (_NVMController->Expected_finish_time(chip) - MQSimulator->Time() < eraseReasonableSuspensionTimeForRead) {
+				if (_NVMController->Expected_finish_time(chip) - ns3::Simulator::Now().GetNanoSeconds() < eraseReasonableSuspensionTimeForRead) {
 					return false;
 				}
 				suspensionRequired = true;
@@ -377,7 +377,7 @@ namespace SSD_Components
 			case ChipStatus::ERASING:
 				if (!eraseSuspensionEnabled || _NVMController->HasSuspendedCommand(chip))
 					return false;
-				if (_NVMController->Expected_finish_time(chip) - MQSimulator->Time() < eraseReasonableSuspensionTimeForWrite)
+				if (_NVMController->Expected_finish_time(chip) - ns3::Simulator::Now().GetNanoSeconds() < eraseReasonableSuspensionTimeForWrite)
 					return false;
 				suspensionRequired = true;
 			default:

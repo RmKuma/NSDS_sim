@@ -10,6 +10,10 @@
 #include "ONFI_Channel_NVDDR2.h"
 #include "Flash_Transaction_Queue.h"
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
+
+
 namespace SSD_Components
 {
 	enum class NVDDR2_SimEventType
@@ -41,7 +45,7 @@ namespace SSD_Components
 		void PrepareSuspend()
 		{
 			SuspendedCommand = ActiveCommand;
-			RemainingExecTime = Expected_finish_time - MQSimulator->Time();
+			RemainingExecTime = Expected_finish_time - ns3::Simulator::Now().GetNanoSeconds();
 			SuspendedTransactions.insert(SuspendedTransactions.begin(), ActiveTransactions.begin(), ActiveTransactions.end());
 			Suspended = true;
 			ActiveCommand = NULL;
@@ -52,7 +56,7 @@ namespace SSD_Components
 		void PrepareResume()
 		{
 			ActiveCommand = SuspendedCommand;
-			Expected_finish_time = MQSimulator->Time() + RemainingExecTime;
+			Expected_finish_time = ns3::Simulator::Now().GetNanoSeconds() + RemainingExecTime;
 			ActiveTransactions.insert(ActiveTransactions.begin(), SuspendedTransactions.begin(), SuspendedTransactions.end());
 			Suspended = false;
 			SuspendedCommand = NULL;

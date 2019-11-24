@@ -33,14 +33,14 @@ namespace Host_Components
 				if (Message_buffer_toward_root_complex.size() > 1) {//There are active transfers
 					return;
 				}
-				MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::HOST, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
+				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::HOST, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
 				break;
 			case PCIe_Destination_Type::DEVICE://Message from Host to the SSD device
 				Message_buffer_toward_ssd_device.push(message);
 				if (Message_buffer_toward_ssd_device.size() > 1) {
 					return;
 				}
-				MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::DEVICE, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
+				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::DEVICE, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
 				break;
 			default:
 				break;
@@ -61,7 +61,7 @@ namespace Host_Components
 				Message_buffer_toward_root_complex.pop();
 				root_complex->Consume_pcie_message(message);
 				if (Message_buffer_toward_root_complex.size() > 0) {//There are active transfers
-					MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_transfer_time(Message_buffer_toward_root_complex.front()),
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(Message_buffer_toward_root_complex.front()),
 						this, (void*)(intptr_t)PCIe_Destination_Type::HOST, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
 				}
 				break;
@@ -70,7 +70,7 @@ namespace Host_Components
 				Message_buffer_toward_ssd_device.pop();
 				pcie_switch->Deliver_to_device(message);
 				if (Message_buffer_toward_ssd_device.size() > 0) {
-					MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_transfer_time(Message_buffer_toward_ssd_device.front()),
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(Message_buffer_toward_ssd_device.front()),
 						this, (void*)(intptr_t)PCIe_Destination_Type::DEVICE, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
 				}
 				break;

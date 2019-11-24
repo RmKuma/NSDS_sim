@@ -3,6 +3,8 @@
 #include "ns3/Engine.h"
 #include "IO_Flow_Synthetic.h"
 
+#include "ns3/simulator.h"
+
 namespace Host_Components
 {
 	IO_Flow_Synthetic::IO_Flow_Synthetic(const sim_object_id_type& name, uint16_t flow_id,
@@ -69,7 +71,7 @@ namespace Host_Components
 	Host_IO_Request* IO_Flow_Synthetic::Generate_next_request()
 	{
 		if (stop_time > 0) {
-			if (MQSimulator->Time() > stop_time) {
+			if (ns3::Simulator::Now().GetNanoSeconds() > stop_time) {
 				return NULL;
 			}
 		} else if (STAT_generated_request_count >= total_requests_to_be_generated) {
@@ -155,7 +157,7 @@ namespace Host_Components
 			request->Start_LBA -= request->Start_LBA % alignment_value;
 		}
 		STAT_generated_request_count++;
-		request->Arrival_time = MQSimulator->Time();
+		request->Arrival_time = ns3::Simulator::Now().GetNanoSeconds();
 		DEBUG("* Host: Request generated - " << (request->Type == Host_IO_Request_Type::READ ? "Read, " : "Write, ") << "LBA:" << request->Start_LBA << ", Size_in_bytes:" << request->LBA_count << "")
 
 		return request;
@@ -201,7 +203,8 @@ namespace Host_Components
 		}
 
 		if (generator_type == Utils::Request_Generator_Type::BANDWIDTH) {
-			MQSimulator->Register_sim_event((sim_time_type)random_time_interval_generator->Exponential((double)Average_inter_arrival_time_nano_sec), this, 0, 0);
+			MQSimulator->Register_sim_event((sim_time_type)random_time_interval_generator->Exponential((double)Average_inter_arrival_time_nano_sec), this, 0, 0);	
+			
 		} else {
 			MQSimulator->Register_sim_event((sim_time_type)1, this, 0, 0);
 		}
@@ -217,7 +220,7 @@ namespace Host_Components
 			Host_IO_Request* req = Generate_next_request();
 			if (req != NULL) {
 				Submit_io_request(req);
-				MQSimulator->Register_sim_event(MQSimulator->Time() + (sim_time_type)random_time_interval_generator->Exponential((double)Average_inter_arrival_time_nano_sec), this, 0, 0);
+				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + (sim_time_type)random_time_interval_generator->Exponential((double)Average_inter_arrival_time_nano_sec), this, 0, 0);
 			}
 		} else {
 			for (unsigned int i = 0; i < average_number_of_enqueued_requests; i++) {

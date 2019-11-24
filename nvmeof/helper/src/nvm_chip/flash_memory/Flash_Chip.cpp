@@ -111,7 +111,7 @@ namespace NVM
 				PRINT_ERROR("Flash chip " << ID() << ": executing a flash operation on a busy die!")
 			}
 
-			targetDie->Expected_finish_time = MQSimulator->Time() + Get_command_execution_latency(command->CommandCode, command->Address[0].PageID);
+			targetDie->Expected_finish_time = ns3::Simulator::Now().GetNanoSeconds() + Get_command_execution_latency(command->CommandCode, command->Address[0].PageID);
 			targetDie->CommandFinishEvent = MQSimulator->Register_sim_event(targetDie->Expected_finish_time,
 				this, command, static_cast<int>(Chip_Sim_Event_Type::COMMAND_FINISHED));
 			targetDie->CurrentCMD = command;
@@ -119,7 +119,7 @@ namespace NVM
 			idleDieNo--;
 
 			if (status == Internal_Status::IDLE) {
-				executionStartTime = MQSimulator->Time();
+				executionStartTime = ns3::Simulator::Now().GetNanoSeconds();
 				expectedFinishTime = targetDie->Expected_finish_time;
 				status = Internal_Status::BUSY;
 			}
@@ -139,9 +139,9 @@ namespace NVM
 			this->idleDieNo++;
 			if (idleDieNo == die_no) {
 				this->status = Internal_Status::IDLE;
-				STAT_totalExecTime += MQSimulator->Time() - executionStartTime;
+				STAT_totalExecTime += ns3::Simulator::Now().GetNanoSeconds() - executionStartTime;
 				if (this->lastTransferStart != INVALID_TIME) {
-					STAT_totalOverlappedXferExecTime += MQSimulator->Time() - lastTransferStart;
+					STAT_totalOverlappedXferExecTime += ns3::Simulator::Now().GetNanoSeconds() - lastTransferStart;
 				}
 			}
 
@@ -202,7 +202,7 @@ namespace NVM
 
 		void Flash_Chip::Suspend(flash_die_ID_type dieID)
 		{
-			STAT_totalExecTime += MQSimulator->Time() - executionStartTime;
+			STAT_totalExecTime += ns3::Simulator::Now().GetNanoSeconds() - executionStartTime;
 
 			Die* targetDie = Dies[dieID];
 			if (targetDie->Suspended) {
@@ -212,7 +212,7 @@ namespace NVM
 			/*if (targetDie->CurrentCMD & CMD_READ != 0)
 			throw "Suspend is not supported for read operations!";*/
 
-			targetDie->RemainingSuspendedExecTime = targetDie->Expected_finish_time - MQSimulator->Time();
+			targetDie->RemainingSuspendedExecTime = targetDie->Expected_finish_time - ns3::Simulator::Now().GetNanoSeconds();
 			MQSimulator->Ignore_sim_event(targetDie->CommandFinishEvent);//The simulator engine should not execute the finish event for the suspended command
 			targetDie->CommandFinishEvent = NULL;
 
@@ -243,7 +243,7 @@ namespace NVM
 			targetDie->Suspended = false;
 			STAT_totalResumeCount++;
 
-			targetDie->Expected_finish_time = MQSimulator->Time() + targetDie->RemainingSuspendedExecTime;
+			targetDie->Expected_finish_time = ns3::Simulator::Now().GetNanoSeconds() + targetDie->RemainingSuspendedExecTime;
 			targetDie->CommandFinishEvent = MQSimulator->Register_sim_event(targetDie->Expected_finish_time,
 				this, targetDie->CurrentCMD, static_cast<int>(Chip_Sim_Event_Type::COMMAND_FINISHED));
 			if (targetDie->Expected_finish_time > this->expectedFinishTime) {
@@ -253,7 +253,7 @@ namespace NVM
 			targetDie->Status = DieStatus::BUSY;
 			this->idleDieNo--;
 			this->status = Internal_Status::BUSY;
-			executionStartTime = MQSimulator->Time();
+			executionStartTime = ns3::Simulator::Now().GetNanoSeconds();
 		}
 
 		sim_time_type Flash_Chip::GetSuspendProgramTime()
@@ -276,19 +276,19 @@ namespace NVM
 			xmlwriter.Write_attribute_string_inline(attr, val);
 
 			attr = "Fraction_of_Time_in_Execution";
-			val = std::to_string(STAT_totalExecTime / double(MQSimulator->Time()));
+			val = std::to_string(STAT_totalExecTime / double(ns3::Simulator::Now().GetNanoSeconds()));
 			xmlwriter.Write_attribute_string_inline(attr, val);
 
 			attr = "Fraction_of_Time_in_DataXfer";
-			val = std::to_string(STAT_totalXferTime / double(MQSimulator->Time()));
+			val = std::to_string(STAT_totalXferTime / double(ns3::Simulator::Now().GetNanoSeconds()));
 			xmlwriter.Write_attribute_string_inline(attr, val);
 
 			attr = "Fraction_of_Time_in_DataXfer_and_Execution";
-			val = std::to_string(STAT_totalOverlappedXferExecTime / double(MQSimulator->Time()));
+			val = std::to_string(STAT_totalOverlappedXferExecTime / double(ns3::Simulator::Now().GetNanoSeconds()));
 			xmlwriter.Write_attribute_string_inline(attr, val);
 
 			attr = "Fraction_of_Time_Idle";
-			val = std::to_string((MQSimulator->Time() - STAT_totalOverlappedXferExecTime - STAT_totalXferTime) / double(MQSimulator->Time()));
+			val = std::to_string((ns3::Simulator::Now().GetNanoSeconds() - STAT_totalOverlappedXferExecTime - STAT_totalXferTime) / double(ns3::Simulator::Now().GetNanoSeconds()));
 			xmlwriter.Write_attribute_string_inline(attr, val);
 		
 			xmlwriter.Write_end_element_tag();

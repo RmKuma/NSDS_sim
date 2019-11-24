@@ -33,22 +33,22 @@ namespace NVM
 
 			void StartCMDXfer()
 			{
-				this->lastTransferStart = MQSimulator->Time();
+				this->lastTransferStart = ns3::Simulator::Now().GetNanoSeconds();
 			}
 			void StartCMDDataInXfer()
 			{
-				this->lastTransferStart = MQSimulator->Time();
+				this->lastTransferStart = ns3::Simulator::Now().GetNanoSeconds();
 			}
 			void StartDataOutXfer()
 			{
-				this->lastTransferStart = MQSimulator->Time();
+				this->lastTransferStart = ns3::Simulator::Now().GetNanoSeconds();
 			}
 			void EndCMDXfer(Flash_Command* command)//End transferring write data to the Flash chip
 			{
-				this->STAT_totalXferTime += (MQSimulator->Time() - this->lastTransferStart);
+				this->STAT_totalXferTime += (ns3::Simulator::Now().GetNanoSeconds() - this->lastTransferStart);
 				if (this->idleDieNo != die_no)
-					STAT_totalOverlappedXferExecTime += (MQSimulator->Time() - lastTransferStart);
-				this->Dies[command->Address[0].DieID]->STAT_TotalXferTime += (MQSimulator->Time() - lastTransferStart);
+					STAT_totalOverlappedXferExecTime += (ns3::Simulator::Now().GetNanoSeconds() - lastTransferStart);
+				this->Dies[command->Address[0].DieID]->STAT_TotalXferTime += (ns3::Simulator::Now().GetNanoSeconds() - lastTransferStart);
 
 				start_command_execution(command);
 
@@ -56,10 +56,10 @@ namespace NVM
 			}
 			void EndCMDDataInXfer(Flash_Command* command)//End transferring write data of a group of multi-plane transactions to the Flash chip
 			{
-				this->STAT_totalXferTime += (MQSimulator->Time() - this->lastTransferStart);
+				this->STAT_totalXferTime += (ns3::Simulator::Now().GetNanoSeconds() - this->lastTransferStart);
 				if (this->idleDieNo != die_no)
-					STAT_totalOverlappedXferExecTime += (MQSimulator->Time() - lastTransferStart);
-				this->Dies[command->Address[0].DieID]->STAT_TotalXferTime += (MQSimulator->Time() - lastTransferStart);
+					STAT_totalOverlappedXferExecTime += (ns3::Simulator::Now().GetNanoSeconds() - lastTransferStart);
+				this->Dies[command->Address[0].DieID]->STAT_TotalXferTime += (ns3::Simulator::Now().GetNanoSeconds() - lastTransferStart);
 
 				start_command_execution(command);
 
@@ -67,10 +67,10 @@ namespace NVM
 			}
 			void EndDataOutXfer(Flash_Command* command)
 			{
-				this->STAT_totalXferTime += (MQSimulator->Time() - this->lastTransferStart);
+				this->STAT_totalXferTime += (ns3::Simulator::Now().GetNanoSeconds() - this->lastTransferStart);
 				if (this->idleDieNo != die_no)
-					STAT_totalOverlappedXferExecTime += (MQSimulator->Time() - lastTransferStart);
-				this->Dies[command->Address[0].DieID]->STAT_TotalXferTime += (MQSimulator->Time() - lastTransferStart);
+					STAT_totalOverlappedXferExecTime += (ns3::Simulator::Now().GetNanoSeconds() - lastTransferStart);
+				this->Dies[command->Address[0].DieID]->STAT_TotalXferTime += (ns3::Simulator::Now().GetNanoSeconds() - lastTransferStart);
 
 				this->lastTransferStart = INVALID_TIME;
 			}

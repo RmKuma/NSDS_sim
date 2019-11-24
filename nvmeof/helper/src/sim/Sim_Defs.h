@@ -16,7 +16,7 @@ typedef sim_time_type data_timestamp_type;
 #define ONE_SECOND 1000000000
 typedef std::string sim_object_id_type;
 
-#define CurrentTimeStamp MQSimulator->Time()
+#define CurrentTimeStamp ns3::Simulator::Now().GetNanoSeconds()
 #define PRINT_ERROR(MSG) {\
 							std::cerr << "ERROR:" ;\
 							std::cerr << MSG << std::endl; \

@@ -199,9 +199,9 @@ namespace SSD_Components
 		}
 
 		//Reset control data structures used for hot/cold separation 
-		if (MQSimulator->Time() > next_bloom_filter_reset_milestone) {
+		if (ns3::Simulator::Now().GetNanoSeconds() > next_bloom_filter_reset_milestone) {
 			bloom_filter[0].clear();
-			next_bloom_filter_reset_milestone = MQSimulator->Time() + bloom_filter_reset_step;
+			next_bloom_filter_reset_milestone = ns3::Simulator::Now().GetNanoSeconds() + bloom_filter_reset_step;
 		}
 	}
 
@@ -282,7 +282,7 @@ namespace SSD_Components
 	{
 		dram_execution_queue[request_info->Stream_id].push(request_info);
 		if(dram_execution_queue[request_info->Stream_id].size() == 1) {
-			MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_dram_access_time(request_info->Size_in_bytes, dram_row_size,
+			MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_dram_access_time(request_info->Size_in_bytes, dram_row_size,
 				dram_busrt_size, dram_burst_transfer_time_ddr, dram_tRCD, dram_tCL, dram_tRP),
 				this, request_info, static_cast<int>(request_info->next_event_type));
 		}
@@ -313,7 +313,7 @@ namespace SSD_Components
 		dram_execution_queue[transfer_inf->Stream_id].pop();
 		if (dram_execution_queue[transfer_inf->Stream_id].size() > 0) {
 			Memory_Transfer_Info* new_transfer_info = dram_execution_queue[transfer_inf->Stream_id].front();
-			MQSimulator->Register_sim_event(MQSimulator->Time() + estimate_dram_access_time(new_transfer_info->Size_in_bytes, dram_row_size, dram_busrt_size,
+			MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_dram_access_time(new_transfer_info->Size_in_bytes, dram_row_size, dram_busrt_size,
 				dram_burst_transfer_time_ddr, dram_tRCD, dram_tCL, dram_tRP),
 				this, new_transfer_info, static_cast<int>(new_transfer_info->next_event_type));
 		}

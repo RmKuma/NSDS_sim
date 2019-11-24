@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "ns3/Logical_Address_Partitioning_Unit.h"
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
 namespace MQSimEngine
 {
 	Engine* Engine::_instance = NULL;
@@ -117,10 +119,14 @@ namespace MQSimEngine
 
 	Sim_Event* Engine::Register_sim_event(sim_time_type fireTime, Sim_Object* targetObject, void* parameters, int type)
 	{
+
 		Sim_Event* ev = new Sim_Event(fireTime, targetObject, parameters, type);
+		ns3::Simulator::Schedule( ns3::MicroSeconds((fireTime - ns3::Simulator::Now().GetNanoSeconds())/1000.0), &MQSimEngine::Sim_Object::Execute_simulator_event, targetObject, ev); 	
+		/*
 		DEBUG("RegisterEvent " << fireTime << " " << targetObject)
 		_EventList->Insert_sim_event(ev);
 		return ev;
+		*/
 	}
 
 	void Engine::Ignore_sim_event(Sim_Event* ev)

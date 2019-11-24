@@ -79,7 +79,7 @@ namespace Host_Components
 							request_queue_in_memory[sata_ncq.Submission_queue_tail] = new_req;
 							SATA_UPDATE_SQ_TAIL(sata_ncq);
 						}
-						new_req->Enqueue_time = MQSimulator->Time();
+						new_req->Enqueue_time = ns3::Simulator::Now().GetNanoSeconds();
 						pcie_root_complex->Write_to_device(sata_ncq.Submission_tail_register_address_on_device, sata_ncq.Submission_queue_tail);//Based on NVMe protocol definition, the updated tail pointer should be informed to the device
 					} else {
 						break;
@@ -89,7 +89,7 @@ namespace Host_Components
 				delete cqe;
 
 				if(consume_requests.size() > 0) {
-					MQSimulator->Register_sim_event(MQSimulator->Time() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::CONSUME_IO_REQUEST));
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::CONSUME_IO_REQUEST));
 				}
 				break;
 			}
@@ -111,12 +111,12 @@ namespace Host_Components
 						request_queue_in_memory[sata_ncq.Submission_queue_tail] = request;
 						SATA_UPDATE_SQ_TAIL(sata_ncq);
 					}
-					request->Enqueue_time = MQSimulator->Time();
+					request->Enqueue_time = ns3::Simulator::Now().GetNanoSeconds();
 					pcie_root_complex->Write_to_device(sata_ncq.Submission_tail_register_address_on_device, sata_ncq.Submission_queue_tail);//Based on NVMe protocol definition, the updated tail pointer should be informed to the device
 				}
 
 				if (host_requests.size() > 0) {
-					MQSimulator->Register_sim_event(MQSimulator->Time() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::SUBMIT_IO_REQUEST));
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::SUBMIT_IO_REQUEST));
 				}
 
 				break;
@@ -128,7 +128,7 @@ namespace Host_Components
 	{
 		host_requests.push(request);
 		if (host_requests.size() == 1) {
-			MQSimulator->Register_sim_event(MQSimulator->Time() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::SUBMIT_IO_REQUEST));
+			MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::SUBMIT_IO_REQUEST));
 		}
 	}
 
@@ -136,7 +136,7 @@ namespace Host_Components
 	{
 		consume_requests.push(cqe);
 		if (consume_requests.size() == 1) {
-			MQSimulator->Register_sim_event(MQSimulator->Time() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::CONSUME_IO_REQUEST));
+			MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + hba_processing_delay, this, NULL, static_cast<int>(HBA_Sim_Events::CONSUME_IO_REQUEST));
 		}
 	}
 	

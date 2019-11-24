@@ -104,12 +104,12 @@ namespace SSD_Components
 			case Transaction_Type::READ:
 				this->input_streams[transaction->Stream_id]->STAT_sum_of_read_transactions_execution_time += transaction->STAT_execution_time;
 				this->input_streams[transaction->Stream_id]->STAT_sum_of_read_transactions_transfer_time += transaction->STAT_transfer_time;
-				this->input_streams[transaction->Stream_id]->STAT_sum_of_read_transactions_waiting_time += (MQSimulator->Time() - transaction->Issue_time) - transaction->STAT_execution_time - transaction->STAT_transfer_time;
+				this->input_streams[transaction->Stream_id]->STAT_sum_of_read_transactions_waiting_time += (ns3::Simulator::Now().GetNanoSeconds() - transaction->Issue_time) - transaction->STAT_execution_time - transaction->STAT_transfer_time;
 				break;
 			case Transaction_Type::WRITE:
 				this->input_streams[transaction->Stream_id]->STAT_sum_of_write_transactions_execution_time += transaction->STAT_execution_time;
 				this->input_streams[transaction->Stream_id]->STAT_sum_of_write_transactions_transfer_time += transaction->STAT_transfer_time;
-				this->input_streams[transaction->Stream_id]->STAT_sum_of_write_transactions_waiting_time += (MQSimulator->Time() - transaction->Issue_time) - transaction->STAT_execution_time - transaction->STAT_transfer_time;
+				this->input_streams[transaction->Stream_id]->STAT_sum_of_write_transactions_waiting_time += (ns3::Simulator::Now().GetNanoSeconds() - transaction->Issue_time) - transaction->STAT_execution_time - transaction->STAT_transfer_time;
 				break;
 			default:
 				break;

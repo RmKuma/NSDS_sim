@@ -3,6 +3,10 @@
 #include <stack>
 #include <cmath>
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
+
+
 namespace SSD_Components
 {
 
@@ -171,7 +175,7 @@ namespace SSD_Components
 				}
 			}
 		}
-		MQSimulator->Register_sim_event(MQSimulator->Time() + flow_classification_epoch, this, 0, 0);
+		MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + flow_classification_epoch, this, 0, 0);
 	}
 
 	inline void TSU_FLIN::Prepare_for_transaction_submit()
@@ -336,8 +340,8 @@ namespace SSD_Components
 		std::list<NVM_Transaction_Flash*>::iterator itr = queue->begin();
 		sim_time_type time_to_finish = 0;
 		if(_NVMController->Is_chip_busy(*itr))
-			if (_NVMController->Expected_finish_time(*itr) > MQSimulator->Time())
-				time_to_finish = _NVMController->Expected_finish_time(*itr) - MQSimulator->Time();//T^chip_busy
+			if (_NVMController->Expected_finish_time(*itr) > ns3::Simulator::Now().GetNanoSeconds())
+				time_to_finish = _NVMController->Expected_finish_time(*itr) - ns3::Simulator::Now().GetNanoSeconds();//T^chip_busy
 
 		std::vector<sim_time_type> T_wait_shared_list;
 		while (itr != start)
@@ -355,7 +359,7 @@ namespace SSD_Components
 			max_slowdown_list.push(slowdown_max);
 
 			time_to_finish += _NVMController->Expected_transfer_time(*itr) + _NVMController->Expected_finish_time(*itr);
-			sim_time_type T_TR_shared = time_to_finish + (MQSimulator->Time() - (*itr)->Issue_time);
+			sim_time_type T_TR_shared = time_to_finish + (ns3::Simulator::Now().GetNanoSeconds() - (*itr)->Issue_time);
 			T_wait_shared_list.push_back(T_TR_shared);
 			double slowdown = (double)T_TR_shared / (double)(*itr)->Estimated_alone_waiting_time;
 			if (slowdown < slowdown_min)
@@ -453,8 +457,8 @@ namespace SSD_Components
 				sim_time_type expected_last_time = chip_tr->Issue_time + chip_tr->Estimated_alone_waiting_time
 					+ _NVMController->Expected_transfer_time(*position) + _NVMController->Expected_finish_time(*position);
 
-				if (expected_last_time > MQSimulator->Time())
-					(*position)->Estimated_alone_waiting_time = expected_last_time - MQSimulator->Time();
+				if (expected_last_time > ns3::Simulator::Now().GetNanoSeconds())
+					(*position)->Estimated_alone_waiting_time = expected_last_time - ns3::Simulator::Now().GetNanoSeconds();
 				
 				return;
 			}
@@ -463,8 +467,8 @@ namespace SSD_Components
 		sim_time_type expected_last_time = (*itr)->Issue_time + (*itr)->Estimated_alone_waiting_time
 			+ _NVMController->Expected_transfer_time(*position) + _NVMController->Expected_finish_time(*position);
 
-		if (expected_last_time > MQSimulator->Time())
-			(*position)->Estimated_alone_waiting_time = expected_last_time - MQSimulator->Time();
+		if (expected_last_time > ns3::Simulator::Now().GetNanoSeconds())
+			(*position)->Estimated_alone_waiting_time = expected_last_time - ns3::Simulator::Now().GetNanoSeconds();
 	}
 
 	double TSU_FLIN::fairness_based_on_average_slowdown(unsigned int channel_id, unsigned int chip_id, unsigned int priority_class, bool is_read, stream_id_type& flow_with_max_average_slowdown)

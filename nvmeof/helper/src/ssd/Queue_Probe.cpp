@@ -21,7 +21,7 @@ namespace SSD_Components
 		if (transaction == NULL)
 			PRINT_ERROR("Inserting a null object to queue!")
 
-		currentObjectsInQueue[transaction] = MQSimulator->Time();
+		currentObjectsInQueue[transaction] = ns3::Simulator::Now().GetNanoSeconds();
 		nRequests++;
 		nRequestsEpoch++;
 		setCount(count + 1);
@@ -36,7 +36,7 @@ namespace SSD_Components
 			throw std::logic_error("Object can not be null if accurateTimingEnabled=ture");
 		sim_time_type et = currentObjectsInQueue[transaction];
 		currentObjectsInQueue.erase(transaction);
-		sim_time_type tc = MQSimulator->Time() - et;
+		sim_time_type tc = ns3::Simulator::Now().GetNanoSeconds() - et;
 		totalWaitingTime += tc;
 		if (tc > maxWaitingTime)
 			maxWaitingTime = tc;
@@ -46,7 +46,7 @@ namespace SSD_Components
 
 	void Queue_Probe::setCount(int val)
 	{
-		sim_time_type n = MQSimulator->Time();
+		sim_time_type n = ns3::Simulator::Now().GetNanoSeconds();
 		states[count].totalTime += n - lastCountChange;
 		statesEpoch[count].totalTime += n - lastCountChange;
 
@@ -70,7 +70,7 @@ namespace SSD_Components
 		nRequestsEpoch = 0;
 		nDeparturesEpoch = 0;
 		totalWaitingTimeEpoch = 0;
-		epochStartTime = MQSimulator->Time();
+		epochStartTime = ns3::Simulator::Now().GetNanoSeconds();
 
 		for(unsigned int i = 0; i < statesEpoch.size(); i++) {
 			statesEpoch[i].totalTime = 0;
@@ -89,7 +89,7 @@ namespace SSD_Components
 		writer.Write_attribute_string("NDepartures", std::to_string(NDepartures()));
 		for (unsigned int i = 0; i < states.size(); i++) {
 			writer.Write_start_element_tag(id + "_Distribution");
-			sim_time_type now = MQSimulator->Time();
+			sim_time_type now = ns3::Simulator::Now().GetNanoSeconds();
 			sim_time_type t = states[i].totalTime;
 			if (count == i) {
 				t += now - lastCountChange;
@@ -134,7 +134,7 @@ namespace SSD_Components
 		sim_time_type sum = 0;
 		for (unsigned int len = 0; len < states.size(); len++)
 			sum += states[len].totalTime * len;
-		return (double)sum / (double)MQSimulator->Time();
+		return (double)sum / (double)ns3::Simulator::Now().GetNanoSeconds();
 	}
 
 	double Queue_Probe::STDevQueueLength()
@@ -143,10 +143,10 @@ namespace SSD_Components
 		for (unsigned int len = 0; len < states.size(); len++) {
 			sum += states[len].totalTime * len;
 		}
-		double mean = (double)sum / (double)MQSimulator->Time();
+		double mean = (double)sum / (double)ns3::Simulator::Now().GetNanoSeconds();
 		double stdev = 0.0;
 		for (unsigned int len = 0; len < states.size(); len++) {
-			stdev += std::pow((double)states[len].totalTime * len / (double)MQSimulator->Time() - mean, 2);
+			stdev += std::pow((double)states[len].totalTime * len / (double)ns3::Simulator::Now().GetNanoSeconds() - mean, 2);
 		}
 
 		return std::sqrt(stdev);
@@ -161,7 +161,7 @@ namespace SSD_Components
 			sumTime += statesEpoch[len].totalTime;
 		}
 
-		return (double)sum / (double)(MQSimulator->Time() - epochStartTime);
+		return (double)sum / (double)(ns3::Simulator::Now().GetNanoSeconds() - epochStartTime);
 	}
 
 	sim_time_type Queue_Probe::MaxWaitingTime()

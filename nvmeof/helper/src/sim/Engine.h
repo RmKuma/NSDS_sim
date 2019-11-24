@@ -6,6 +6,8 @@
 #include "Sim_Defs.h"
 #include "EventTree.h"
 #include "Sim_Object.h"
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
 
 namespace MQSimEngine {
 	class Engine

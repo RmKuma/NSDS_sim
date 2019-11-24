@@ -3,6 +3,10 @@
 #include "NVM_PHY_ONFI_NVDDR2.h"
 #include "Stats.h"
 
+#include "ns3/simulator.h"
+#include "ns3/nstime.h"
+
+
 namespace SSD_Components {
 	/*hack: using this style to emulate event/delegate*/
 	NVM_PHY_ONFI_NVDDR2* NVM_PHY_ONFI_NVDDR2::_my_instance;
@@ -197,8 +201,8 @@ namespace SSD_Components {
 				if (chipBKE->OngoingDieCMDTransfers.size() == 0) {
 					targetChip->StartCMDXfer();
 					chipBKE->Status = ChipStatus::CMD_IN;
-					chipBKE->Last_transfer_finish_time = MQSimulator->Time() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()];
-					MQSimulator->Register_sim_event(MQSimulator->Time() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()], this,
+					chipBKE->Last_transfer_finish_time = ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()];
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()], this,
 						dieBKE, (int)NVDDR2_SimEventType::READ_CMD_ADDR_TRANSFERRED);
 				} else {
 					dieBKE->DieInterleavedTime = suspendTime + target_channel->ReadCommandTime[transaction_list.size()];
@@ -233,8 +237,8 @@ namespace SSD_Components {
 					if (chipBKE->OngoingDieCMDTransfers.size() == 0) {
 						targetChip->StartCMDDataInXfer();
 						chipBKE->Status = ChipStatus::CMD_DATA_IN;
-						chipBKE->Last_transfer_finish_time = MQSimulator->Time() + suspendTime + target_channel->ProgramCommandTime[transaction_list.size()] + data_transfer_time;
-						MQSimulator->Register_sim_event(MQSimulator->Time() + suspendTime + target_channel->ProgramCommandTime[transaction_list.size()] + data_transfer_time,
+						chipBKE->Last_transfer_finish_time = ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->ProgramCommandTime[transaction_list.size()] + data_transfer_time;
+						MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->ProgramCommandTime[transaction_list.size()] + data_transfer_time,
 							this, dieBKE, (int)NVDDR2_SimEventType::PROGRAM_CMD_ADDR_DATA_TRANSFERRED);
 					} else {
 						dieBKE->DieInterleavedTime = suspendTime + target_channel->ProgramCommandTime[transaction_list.size()] + data_transfer_time;
@@ -264,8 +268,8 @@ namespace SSD_Components {
 					if (chipBKE->OngoingDieCMDTransfers.size() == 0) {
 						targetChip->StartCMDXfer();
 						chipBKE->Status = ChipStatus::CMD_IN;
-						chipBKE->Last_transfer_finish_time = MQSimulator->Time() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()];
-						MQSimulator->Register_sim_event(MQSimulator->Time() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()], this,
+						chipBKE->Last_transfer_finish_time = ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()];
+						MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->ReadCommandTime[transaction_list.size()], this,
 							dieBKE, (int)NVDDR2_SimEventType::READ_CMD_ADDR_TRANSFERRED);
 					} else {
 						dieBKE->DieInterleavedTime = suspendTime + target_channel->ReadCommandTime[transaction_list.size()];
@@ -296,8 +300,8 @@ namespace SSD_Components {
 				if (chipBKE->OngoingDieCMDTransfers.size() == 0) {
 					targetChip->StartCMDXfer();
 					chipBKE->Status = ChipStatus::CMD_IN;
-					chipBKE->Last_transfer_finish_time = MQSimulator->Time() + suspendTime + target_channel->EraseCommandTime[transaction_list.size()];
-					MQSimulator->Register_sim_event(MQSimulator->Time() + suspendTime + target_channel->EraseCommandTime[transaction_list.size()],
+					chipBKE->Last_transfer_finish_time = ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->EraseCommandTime[transaction_list.size()];
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + suspendTime + target_channel->EraseCommandTime[transaction_list.size()],
 						this, dieBKE, (int)NVDDR2_SimEventType::ERASE_SETUP_COMPLETED);
 				} else {
 					dieBKE->DieInterleavedTime = suspendTime + target_channel->EraseCommandTime[transaction_list.size()];
@@ -346,7 +350,7 @@ namespace SSD_Components {
 				//DEBUG2("Chip " << targetChip->ChannelID << ", " << targetChip->ChipID << ", " << dieBKE->ActiveTransactions.front()->Address.DieID << ": READ_CMD_ADDR_TRANSFERRED ")
 				targetChip->EndCMDXfer(dieBKE->ActiveCommand);
 				for (auto tr : dieBKE->ActiveTransactions) {
-					tr->STAT_execution_time = dieBKE->Expected_finish_time - MQSimulator->Time();
+					tr->STAT_execution_time = dieBKE->Expected_finish_time - ns3::Simulator::Now().GetNanoSeconds();
 				}
 				chipBKE->OngoingDieCMDTransfers.pop();
 				chipBKE->No_of_active_dies++;
@@ -362,7 +366,7 @@ namespace SSD_Components {
 				//DEBUG2("Chip " << targetChip->ChannelID << ", " << targetChip->ChipID << ", " << dieBKE->ActiveTransactions.front()->Address.DieID << ": ERASE_SETUP_COMPLETED ")
 				targetChip->EndCMDXfer(dieBKE->ActiveCommand);
 				for (auto &tr : dieBKE->ActiveTransactions) {
-					tr->STAT_execution_time = dieBKE->Expected_finish_time - MQSimulator->Time();
+					tr->STAT_execution_time = dieBKE->Expected_finish_time - ns3::Simulator::Now().GetNanoSeconds();
 				}
 				chipBKE->OngoingDieCMDTransfers.pop();
 				chipBKE->No_of_active_dies++;
@@ -379,7 +383,7 @@ namespace SSD_Components {
 				//DEBUG2("Chip " << targetChip->ChannelID << ", " << targetChip->ChipID << ", " << dieBKE->ActiveTransactions.front()->Address.DieID <<  ": PROGRAM_CMD_ADDR_DATA_TRANSFERRED " )
 				targetChip->EndCMDDataInXfer(dieBKE->ActiveCommand);
 				for (auto &tr : dieBKE->ActiveTransactions) {
-					tr->STAT_execution_time = dieBKE->Expected_finish_time - MQSimulator->Time();
+					tr->STAT_execution_time = dieBKE->Expected_finish_time - ns3::Simulator::Now().GetNanoSeconds();
 				}
 				chipBKE->OngoingDieCMDTransfers.pop();
 				chipBKE->No_of_active_dies++;
@@ -447,11 +451,11 @@ namespace SSD_Components {
 			}
 			targetChip->StartCMDXfer();
 			waitingChipBKE->Status = ChipStatus::CMD_IN;
-			MQSimulator->Register_sim_event(MQSimulator->Time() + this->channels[channel_id]->ProgramCommandTime[waitingBKE->ActiveTransactions.size()],
+			MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + this->channels[channel_id]->ProgramCommandTime[waitingBKE->ActiveTransactions.size()],
 				this, waitingBKE, (int)NVDDR2_SimEventType::PROGRAM_COPYBACK_CMD_ADDR_TRANSFERRED);
 			waitingChipBKE->OngoingDieCMDTransfers.push(waitingBKE);
 
-			waitingBKE->Expected_finish_time = MQSimulator->Time() + this->channels[channel_id]->ProgramCommandTime[waitingBKE->ActiveTransactions.size()]
+			waitingBKE->Expected_finish_time = ns3::Simulator::Now().GetNanoSeconds() + this->channels[channel_id]->ProgramCommandTime[waitingBKE->ActiveTransactions.size()]
 				+ targetChip->Get_command_execution_latency(waitingBKE->ActiveCommand->CommandCode, waitingBKE->ActiveCommand->Address[0].PageID);
 			if (waitingChipBKE->Expected_command_exec_finish_time < waitingBKE->Expected_finish_time) {
 				waitingChipBKE->Expected_command_exec_finish_time = waitingBKE->Expected_finish_time;
@@ -550,18 +554,18 @@ namespace SSD_Components {
 				}
 				chip->StartCMDXfer();
 				chipBKE->Status = ChipStatus::CMD_IN;
-				MQSimulator->Register_sim_event(MQSimulator->Time() + _my_instance->channels[chip->ChannelID]->ProgramCommandTime[dieBKE->ActiveTransactions.size()],
+				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + _my_instance->channels[chip->ChannelID]->ProgramCommandTime[dieBKE->ActiveTransactions.size()],
 					_my_instance, dieBKE, (int)NVDDR2_SimEventType::PROGRAM_COPYBACK_CMD_ADDR_TRANSFERRED);
 				chipBKE->OngoingDieCMDTransfers.push(dieBKE);
 				_my_instance->channels[chip->ChannelID]->SetStatus(BusChannelStatus::BUSY, chip);
 
-				dieBKE->Expected_finish_time = MQSimulator->Time() + _my_instance->channels[chip->ChannelID]->ProgramCommandTime[dieBKE->ActiveTransactions.size()]
+				dieBKE->Expected_finish_time = ns3::Simulator::Now().GetNanoSeconds() + _my_instance->channels[chip->ChannelID]->ProgramCommandTime[dieBKE->ActiveTransactions.size()]
 					+ chip->Get_command_execution_latency(dieBKE->ActiveCommand->CommandCode, dieBKE->ActiveCommand->Address[0].PageID);
 				if (chipBKE->Expected_command_exec_finish_time < dieBKE->Expected_finish_time)
 					chipBKE->Expected_command_exec_finish_time = dieBKE->Expected_finish_time;
 #if 0	
 				//Copyback data should be read out in order to get rid of bit error propagation
-				MQSimulator->RegisterEvent(MQSimulator->Time() + channels[targetChip->ChannelID]->ProgramCommandTime + NVDDR2DataOutTransferTime(targetTransaction->SizeInByte, channels[targetChip->ChannelID]),
+				MQSimulator->RegisterEvent(ns3::Simulator::Now().GetNanoSeconds() + channels[targetChip->ChannelID]->ProgramCommandTime + NVDDR2DataOutTransferTime(targetTransaction->SizeInByte, channels[targetChip->ChannelID]),
 					this, targetTransaction, (int)NVDDR2_SimEventType::READ_DATA_TRANSFERRED);
 				targetTransaction->STAT_TransferTime += NVDDR2DataOutTransferTime(targetTransaction->SizeInByte, channels[targetChip->ChannelID]);
 #endif
@@ -626,7 +630,7 @@ namespace SSD_Components {
 		dieBKE->ActiveTransfer = tr;
 		channels[tr->Address.ChannelID]->Chips[tr->Address.ChipID]->StartDataOutXfer();
 		chipBKE->Status = ChipStatus::DATA_OUT;
-		MQSimulator->Register_sim_event(MQSimulator->Time() + NVDDR2DataOutTransferTime(tr->Data_and_metadata_size_in_byte, channels[tr->Address.ChannelID]),
+		MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + NVDDR2DataOutTransferTime(tr->Data_and_metadata_size_in_byte, channels[tr->Address.ChannelID]),
 			this, dieBKE, (int)NVDDR2_SimEventType::READ_DATA_TRANSFERRED);
 
 		tr->STAT_transfer_time += NVDDR2DataOutTransferTime(tr->Data_and_metadata_size_in_byte, channels[tr->Address.ChannelID]);
@@ -644,26 +648,26 @@ namespace SSD_Components {
 			case Transaction_Type::READ:
 				chip->StartCMDXfer();
 				bookKeepingTable[chip->ChannelID][chip->ChipID].Status = ChipStatus::CMD_IN;
-				MQSimulator->Register_sim_event(MQSimulator->Time() + bookKeepingEntry->DieInterleavedTime,
+				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + bookKeepingEntry->DieInterleavedTime,
 					this, bookKeepingEntry, (int)NVDDR2_SimEventType::READ_CMD_ADDR_TRANSFERRED);
 				break;
 			case Transaction_Type::WRITE:
 				if (((NVM_Transaction_Flash_WR*)bookKeepingEntry->ActiveTransactions.front())->RelatedRead == NULL) {
 					chip->StartCMDDataInXfer();
 					bookKeepingTable[chip->ChannelID][chip->ChipID].Status = ChipStatus::CMD_DATA_IN;
-					MQSimulator->Register_sim_event(MQSimulator->Time() + bookKeepingEntry->DieInterleavedTime,
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + bookKeepingEntry->DieInterleavedTime,
 						this, bookKeepingEntry, (int)NVDDR2_SimEventType::PROGRAM_CMD_ADDR_DATA_TRANSFERRED);
 				} else {
 					chip->StartCMDXfer();
 					bookKeepingTable[chip->ChannelID][chip->ChipID].Status = ChipStatus::CMD_IN;
-					MQSimulator->Register_sim_event(MQSimulator->Time() + bookKeepingEntry->DieInterleavedTime, this,
+					MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + bookKeepingEntry->DieInterleavedTime, this,
 						bookKeepingEntry, (int)NVDDR2_SimEventType::READ_CMD_ADDR_TRANSFERRED);
 				}
 				break;
 			case Transaction_Type::ERASE:
 				chip->StartCMDXfer();
 				bookKeepingTable[chip->ChannelID][chip->ChipID].Status = ChipStatus::CMD_IN;
-				MQSimulator->Register_sim_event(MQSimulator->Time() + bookKeepingEntry->DieInterleavedTime,
+				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + bookKeepingEntry->DieInterleavedTime,
 					this, bookKeepingEntry, (int)NVDDR2_SimEventType::ERASE_SETUP_COMPLETED);
 				break;
 			default:
