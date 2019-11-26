@@ -3,6 +3,9 @@
 #include "PCIe_Link.h"
 #include "PCIe_Message.h"
 
+#include "ns3/nstime.h"
+#include "ns3/simulator.h"
+
 namespace Host_Components
 {
 	PCIe_Link::PCIe_Link(const sim_object_id_type& id, PCIe_Root_Complex* root_complex, PCIe_Switch* pcie_switch,
@@ -20,9 +23,23 @@ namespace Host_Components
 		this->root_complex = root_complex;
 	}
 
+
 	void PCIe_Link::Set_pcie_switch(PCIe_Switch* pcie_switch) 
 	{
 		this->pcie_switch = pcie_switch;
+	}
+
+    void PCIe_Link::Set_host_app(ns3::Ptr<ns3::Application> app)
+	{
+		this->hostapp = (ns3::NVMeoFHostApplication*) &(*app);
+		this->hostapp->sendResultCallback(MakeCallback(&PCIe_Link::Get_Result, this));
+	}
+
+
+	void PCIe_Link::Set_target_app(ns3::Ptr<ns3::Application> app)
+	{
+		this->targetapp = (ns3::NVMeoFTargetApplication*) &(*app);
+		this->targetapp->sendRequestCallback(MakeCallback(&PCIe_Link::Get_Request, this));
 	}
 
 	void PCIe_Link::Deliver(PCIe_Message* message)
@@ -33,14 +50,18 @@ namespace Host_Components
 				if (Message_buffer_toward_root_complex.size() > 1) {//There are active transfers
 					return;
 				}
-				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::HOST, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
+			    this->targetapp->SendResult((uint64_t)estimate_transfer_time(message));
+				//MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::HOST, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
 				break;
 			case PCIe_Destination_Type::DEVICE://Message from Host to the SSD device
 				Message_buffer_toward_ssd_device.push(message);
 				if (Message_buffer_toward_ssd_device.size() > 1) {
 					return;
 				}
-				MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::DEVICE, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
+			
+				this->hostapp->SendRequest((uint8_t const *) message, (uint64_t)estimate_transfer_time(message));
+				//ns3::Simulator::Schedule( ns3::NanoSeconds(estimate_transfer_time(message)), &ns3::NVMeoFHostApplication::SendRequest, *(this->hostapp));
+				//MQSimulator->Register_sim_event(ns3::Simulator::Now().GetNanoSeconds() + estimate_transfer_time(message), this, (void*)(intptr_t)PCIe_Destination_Type::DEVICE, static_cast<int>(PCIe_Link_Event_Type::DELIVER));
 				break;
 			default:
 				break;
@@ -50,7 +71,7 @@ namespace Host_Components
 	void PCIe_Link::Start_simulation() {}
 
 	void PCIe_Link::Validate_simulation_config() {}
-
+ 
 	void PCIe_Link::Execute_simulator_event(MQSimEngine::Sim_Event* event)
 	{
 		PCIe_Message* message = NULL;
@@ -75,5 +96,22 @@ namespace Host_Components
 				}
 				break;
 		}
+	}
+	
+	void PCIe_Link::Get_Result(){
+				PCIe_Message* message = Message_buffer_toward_root_complex.front();
+				Message_buffer_toward_root_complex.pop();
+				root_complex->Consume_pcie_message(message);
+				if (Message_buffer_toward_root_complex.size() > 0) {//There are active transfers
+                  this->targetapp->SendResult((uint64_t)estimate_transfer_time(message)); 
+				}
+	}
+void PCIe_Link::Get_Request(){
+				PCIe_Message* message = Message_buffer_toward_ssd_device.front();
+				Message_buffer_toward_ssd_device.pop();
+				pcie_switch->Deliver_to_device(message);
+				if (Message_buffer_toward_ssd_device.size() > 0) {
+					this->hostapp->SendRequest((uint8_t const *) Message_buffer_toward_ssd_device.front(), (uint64_t)estimate_transfer_time(Message_buffer_toward_ssd_device.front()));
+				}
 	}
 }

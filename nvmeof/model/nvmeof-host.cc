@@ -89,6 +89,10 @@ NVMeoFHostApplication::~NVMeoFHostApplication ()
   NS_LOG_FUNCTION (this);
 }
 
+void NVMeoFHostApplication::sendResultCallback(resultCallback rc){
+	m_resultcallback = rc;
+}
+
 uint64_t NVMeoFHostApplication::GetTotalRx () const
 {
   NS_LOG_FUNCTION (this);
@@ -123,6 +127,7 @@ NVMeoFHostApplication::DoDispose (void)
 void NVMeoFHostApplication::StartApplication (void) // Called at time specified by Start
 {
   NS_LOG_FUNCTION (this);
+
 
   // Create the socket if not already
   if (!m_socket)
@@ -166,7 +171,9 @@ void NVMeoFHostApplication::StartApplication (void) // Called at time specified 
     {
 		m_sendPacketEvent = Simulator::Schedule( MicroSeconds(0.0), &NVMeoFHostApplication::SendData, this);
 //      SendData ();
+  		std::cout<<"host application start" << std::endl;
     }
+
 }
 
 void NVMeoFHostApplication::StopApplication (void) // Called at time specified by Stop
@@ -186,20 +193,11 @@ void NVMeoFHostApplication::StopApplication (void) // Called at time specified b
     }
 }
 
-
-// Private helpers
-
-void NVMeoFHostApplication::SendData (void)
+void NVMeoFHostApplication::SendRequest (uint8_t const* buffer, uint64_t time)
 {
   NS_LOG_FUNCTION (this);
 
-  uint64_t packetSize = 100;
-  if(m_connected){
-    Ptr<Packet> packet = Create<Packet> (packetSize);
-    int actual = m_socket->Send (packet);
-	m_sendPacketEvent = Simulator::Schedule(MicroSeconds (100000.0), &NVMeoFHostApplication::SendData, this);
-  }   
-
+  Simulator::Schedule(NanoSeconds(time), &NVMeoFHostApplication::SendRequestPacket, this, buffer);
   /*
   while (m_maxBytes == 0 || m_totBytes < m_maxBytes)
     { // Time to send more
@@ -240,6 +238,24 @@ void NVMeoFHostApplication::SendData (void)
    */
 }
 
+void NVMeoFHostApplication::SendRequestPacket (uint8_t const* buffer)
+{
+  NS_LOG_FUNCTION (this);
+
+  uint64_t packetSize = 512;
+    Ptr<Packet> packet = Create<Packet> ( packetSize);
+    int actual = m_socket->Send (packet);
+
+}
+
+
+// Private helpers
+void NVMeoFHostApplication::SendData ()
+{
+  NS_LOG_FUNCTION (this);
+
+}
+
 void NVMeoFHostApplication::HandleRead (Ptr<Socket> socket)
 {
 	NS_LOG_FUNCTION (this << socket);
@@ -272,6 +288,7 @@ void NVMeoFHostApplication::HandleRead (Ptr<Socket> socket)
 					<< " total Rx " << m_totalRx << " bytes");
 		}
 		socket->GetSockName (localAddress);
+		m_resultcallback();
 	}
 }
 

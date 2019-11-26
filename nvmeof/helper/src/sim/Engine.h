@@ -8,6 +8,8 @@
 #include "Sim_Object.h"
 #include "ns3/simulator.h"
 #include "ns3/nstime.h"
+#include "ns3/PCIe_Message.h"
+
 
 namespace MQSimEngine {
 	class Engine

@@ -1,5 +1,5 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-/*
+/* 
  * Copyright 2007 University of Washington
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -25,9 +25,10 @@
 #include "ns3/event-id.h"
 #include "ns3/ptr.h"
 #include "ns3/traced-callback.h"
-#include "ns3/address.h"
+#include "ns3/address.h"  
 
 namespace ns3 {
+
 
 class Address;
 class Socket;
@@ -91,7 +92,15 @@ public:
    * \return list of pointers to accepted sockets
    */
   std::list<Ptr<Socket> > GetAcceptedSockets (void) const;
- 
+
+  void SendResult(uint64_t time);
+  void SendResultPacket();
+
+  typedef Callback<void> requestCallback;
+  requestCallback m_requestcallback;
+
+  void sendRequestCallback(requestCallback rc);
+
 protected:
   virtual void DoDispose (void);
 private:
@@ -123,6 +132,7 @@ private:
 
   // In the case of TCP, each socket accept returns a new socket, so the 
   // listening socket is stored separately from the accepted sockets
+  Ptr<Socket>     mm_socket;       //!< Listening socket
   Ptr<Socket>     m_socket;       //!< Listening socket
   std::list<Ptr<Socket> > m_socketList; //!< the accepted sockets
 
@@ -135,7 +145,6 @@ private:
 
   /// Callback for tracing the packet Rx events, includes source and destination addresses
   TracedCallback<Ptr<const Packet>, const Address &, const Address &> m_rxTraceWithAddresses;
-
 };
 
 } // namespace ns3

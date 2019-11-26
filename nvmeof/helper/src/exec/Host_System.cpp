@@ -111,6 +111,11 @@ const std::vector<Host_Components::IO_Flow_Base*> Host_System::Get_io_flows()
 	return IO_flows;
 }
 
+void Host_System::Set_host_target_app(ns3::Ptr<ns3::Application> happ, ns3::Ptr<ns3::Application> tapp){
+	this->Link->Set_target_app(tapp);
+	this->Link->Set_host_app(happ);
+}
+
 void Host_System::Start_simulation()
 {
 	switch (ssd_device->Host_interface->GetType()) {

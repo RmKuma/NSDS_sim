@@ -89,10 +89,6 @@ main (int argc, char *argv[])
 	
 	MQSimulator->Reset();
 
-	SSD_Device ssd_device (&exec_params->SSD_Device_Configuration, &exec_params->Host_Configuration.IO_Flow_Definitions);
-	exec_params->Host_Configuration.Input_file_path = workload_defs_file_path.substr(0, workload_defs_file_path.find_last_of("."));
-	Host_System hostsys (&exec_params->Host_Configuration, exec_params->SSD_Device_Configuration.Enabled_Preconditioning, ssd_device.Host_interface);
-	hostsys.Attach_ssd_device(&ssd_device);
 
 	// ============ MQSim IO Flow Definition ===========
 	//
@@ -101,9 +97,9 @@ main (int argc, char *argv[])
     nodes.Create (2);
 
     PointToPointHelper pointToPoint;
-    pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("500Kbps"));
-    pointToPoint.SetChannelAttribute ("Delay", StringValue ("5ms"));
-
+    pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Gbps"));
+    pointToPoint.SetChannelAttribute ("Delay", StringValue ("10us"));
+    
 
     NetDeviceContainer devices;
     devices = pointToPoint.Install (nodes);
@@ -133,9 +129,7 @@ main (int argc, char *argv[])
     ApplicationContainer hostApps = host.Install (nodes.Get (0));
     hostApps.Start (MicroSeconds (0.0));
     hostApps.Stop (MicroSeconds (1000000000.0));
-
 	
-
 //
 // Create a PacketSinkApplication and install it on node 1
 //
@@ -145,10 +139,21 @@ main (int argc, char *argv[])
     targetApps.Start (MicroSeconds (0.0));
     targetApps.Stop (MicroSeconds (1000000000.0));
 
+	SSD_Device ssd_device (&exec_params->SSD_Device_Configuration, &exec_params->Host_Configuration.IO_Flow_Definitions);
+	exec_params->Host_Configuration.Input_file_path = workload_defs_file_path.substr(0, workload_defs_file_path.find_last_of("."));
+	Host_System hostsys (&exec_params->Host_Configuration, exec_params->SSD_Device_Configuration.Enabled_Preconditioning, ssd_device.Host_interface);
+	hostsys.Attach_ssd_device(&ssd_device);
+    hostsys.Set_host_target_app(hostApps.Get(0), targetApps.Get(0));
+
+    //NVMeoFTargetApplication tara = (NVMeoFTargetApplication*) &(*targetApps.Get(0));
+
+    Ptr<NVMeoFHostApplication> host1 = DynamicCast<NVMeoFHostApplication> (hostApps.Get (0));
+    Ptr<NVMeoFTargetApplication> target1 = DynamicCast<NVMeoFTargetApplication> (targetApps.Get (0));
+	
 //
 // Now, do the actual simulation.
 // 
-    MQSimulator->Start_simulation();
+	MQSimulator->Start_simulation();
 	
 	std::cout << "NS Start" << std::endl;
 
@@ -160,8 +165,6 @@ main (int argc, char *argv[])
 
 	collect_results(ssd_device, hostsys, ("result_scenario_" + std::to_string(cntr) + ".xml").c_str());
 
-    Ptr<NVMeoFHostApplication> host1 = DynamicCast<NVMeoFHostApplication> (hostApps.Get (0));
-    Ptr<NVMeoFTargetApplication> target1 = DynamicCast<NVMeoFTargetApplication> (targetApps.Get (0));
     std::cout << "Host Total Bytes Received: " << host1->GetTotalRx () << std::endl;
     std::cout << "Target Total Bytes Received: " << target1->GetTotalRx () << std::endl;
   

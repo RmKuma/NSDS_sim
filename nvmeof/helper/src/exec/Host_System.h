@@ -15,6 +15,8 @@
 #include "SSD_Device.h"
 #include "ns3/Workload_Statistics.h"
 
+#include "ns3/application.h"
+
 class Host_System : public MQSimEngine::Sim_Object, public MQSimEngine::Sim_Reporter
 {
 public:
@@ -25,6 +27,7 @@ public:
 	void Execute_simulator_event(MQSimEngine::Sim_Event* event);
 	void Report_results_in_XML(std::string name_prefix, Utils::XmlWriter& xmlwriter);
 
+	void Set_host_target_app(ns3::Ptr<ns3::Application> happ, ns3::Ptr<ns3::Application> tapp);
 	void Attach_ssd_device(SSD_Device* ssd_device);
 	const std::vector<Host_Components::IO_Flow_Base*> Get_io_flows();
 private:

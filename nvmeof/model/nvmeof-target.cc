@@ -31,6 +31,7 @@
 #include "ns3/trace-source-accessor.h"
 #include "ns3/udp-socket-factory.h"
 #include "nvmeof-target.h"
+#include "ns3/PCIe_Link.h"
 
 namespace ns3 {
 
@@ -70,12 +71,17 @@ NVMeoFTargetApplication::NVMeoFTargetApplication ()
 {
   NS_LOG_FUNCTION (this);
   m_socket = 0;
+  mm_socket = 0;
   m_totalRx = 0;
 }
 
 NVMeoFTargetApplication::~NVMeoFTargetApplication()
 {
   NS_LOG_FUNCTION (this);
+}
+
+void NVMeoFTargetApplication::sendRequestCallback(requestCallback rc){
+	m_requestcallback = rc;
 }
 
 uint64_t NVMeoFTargetApplication::GetTotalRx () const
@@ -145,7 +151,7 @@ void NVMeoFTargetApplication::StartApplication ()    // Called at time specified
     MakeCallback (&NVMeoFTargetApplication::HandleAccept, this));
   m_socket->SetCloseCallbacks (
     MakeCallback (&NVMeoFTargetApplication::HandlePeerClose, this),
-    MakeCallback (&NVMeoFTargetApplication::HandlePeerError, this));
+    MakeCallback (&NVMeoFTargetApplication::HandlePeerError, this));  
 
   
 
@@ -169,6 +175,7 @@ void NVMeoFTargetApplication::StopApplication ()     // Called at time specified
 
 void NVMeoFTargetApplication::HandleRead (Ptr<Socket> socket)
 {
+  mm_socket = socket;
   NS_LOG_FUNCTION (this << socket);
   Ptr<Packet> packet;
   Address from;
@@ -201,7 +208,7 @@ void NVMeoFTargetApplication::HandleRead (Ptr<Socket> socket)
       socket->GetSockName (localAddress);
 	
 	  // Send echo packet
-	  socket->Send (packet);
+      m_requestcallback ( );	  	  
 
       m_rxTrace (packet, from);
       m_rxTraceWithAddresses (packet, from, localAddress);
@@ -219,6 +226,19 @@ void NVMeoFTargetApplication::HandlePeerError (Ptr<Socket> socket)
   NS_LOG_FUNCTION (this << socket);
 }
  
+
+void NVMeoFTargetApplication::SendResult(uint64_t time)
+{
+	Simulator::Schedule(NanoSeconds(time), &NVMeoFTargetApplication::SendResultPacket, this);
+}
+
+void NVMeoFTargetApplication::SendResultPacket()
+{
+	uint64_t packetSize = 4;
+	Ptr<Packet> packet = Create<Packet> (packetSize);
+	mm_socket->Send(packet);
+}
+
 
 void NVMeoFTargetApplication::HandleAccept (Ptr<Socket> s, const Address& from)
 {

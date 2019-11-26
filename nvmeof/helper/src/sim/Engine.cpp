@@ -1,6 +1,10 @@
 #include <stdexcept>
 #include "Engine.h"
 #include "ns3/Logical_Address_Partitioning_Unit.h"
+#include "ns3/PCIe_Message.h"
+#include "ns3/PCIe_Link.h"
+#include "ns3/Sim_Defs.h"
+#include "ns3/PCIe_Message.h"
 
 #include "ns3/simulator.h"
 #include "ns3/nstime.h"
@@ -119,7 +123,6 @@ namespace MQSimEngine
 
 	Sim_Event* Engine::Register_sim_event(sim_time_type fireTime, Sim_Object* targetObject, void* parameters, int type)
 	{
-
 		Sim_Event* ev = new Sim_Event(fireTime, targetObject, parameters, type);
 		ns3::Simulator::Schedule( ns3::MicroSeconds((fireTime - ns3::Simulator::Now().GetNanoSeconds())/1000.0), &MQSimEngine::Sim_Object::Execute_simulator_event, targetObject, ev); 	
 		/*

@@ -8,13 +8,18 @@
 #include "PCIe_Message.h"
 #include "PCIe_Root_Complex.h"
 #include "PCIe_Switch.h"
+#include "ns3/application.h"
+#include "ns3/nvmeof-target.h"
+#include "ns3/nvmeof-host.h"
 
+using namespace ns3;
 namespace Host_Components
 {
 	class PCIe_Switch;
 	class PCIe_Root_Complex;
 	enum class PCIe_Link_Event_Type {DELIVER};
-	
+
+
 	class PCIe_Link : public MQSimEngine::Sim_Object
 	{
 	public:
@@ -30,9 +35,15 @@ namespace Host_Components
 		void Execute_simulator_event(MQSimEngine::Sim_Event*);
 		void Set_root_complex(PCIe_Root_Complex*);
 		void Set_pcie_switch(PCIe_Switch*);
+		void Set_host_app(Ptr<Application>);
+		void Set_target_app(Ptr<Application>);
+		void Get_Request();
+		void Get_Result();
 	private:
 		PCIe_Root_Complex* root_complex;
 		PCIe_Switch* pcie_switch;
+		Ptr<NVMeoFTargetApplication> targetapp;
+		NVMeoFHostApplication* hostapp;
 		double lane_bandwidth_GBPs;//GB/s
 		int lane_count;
 		int tlp_header_size, tlp_max_payload_size;

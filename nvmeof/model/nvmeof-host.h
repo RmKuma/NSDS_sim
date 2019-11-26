@@ -44,6 +44,7 @@ public:
 
   NVMeoFHostApplication ();
 
+  void SendRequest (uint8_t const* buffer, uint64_t time);
   virtual ~NVMeoFHostApplication ();
 
   /**
@@ -68,6 +69,12 @@ public:
    * \return pointer to associated socket
    */
   Ptr<Socket> GetSocket (void) const;
+  
+  typedef Callback<void> resultCallback;
+  resultCallback m_resultcallback;
+
+  void sendResultCallback(resultCallback rc);
+
 
 protected:
   virtual void DoDispose (void);
@@ -80,7 +87,8 @@ private:
    * \brief Send data until the L4 transmission buffer is full.
    */
   void SendData ();
-
+  void SendRequestPacket (uint8_t const* buffer);
+  
   Ptr<Socket>     m_socket;       //!< Associated socket
   Address         m_peer;         //!< Peer address
   bool            m_connected;    //!< True if connected
